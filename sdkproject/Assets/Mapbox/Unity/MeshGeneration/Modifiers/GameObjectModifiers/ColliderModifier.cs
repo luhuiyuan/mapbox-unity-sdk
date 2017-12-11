@@ -12,27 +12,31 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		[SerializeField]
 		private ColliderType _colliderType;
 		private IColliderStrategy _colliderStrategy;
-
-
+		
 		public override void Initialize()
 		{
-			switch (_colliderType)
+			//no need to reset strategy objects on map reinit as we're caching feature game objects as well
+			//creating a new one iff we don't already have one. if you want to reset/recreate you have to clear stuff inside current/old one first.
+			if (_colliderStrategy == null)
 			{
-				case ColliderType.None:
-					_colliderStrategy = null;
-					break;
-				case ColliderType.BoxCollider:
-					_colliderStrategy = new BoxColliderStrategy();
-					break;
-				case ColliderType.MeshCollider:
-					_colliderStrategy = new MeshColliderStrategy();
-					break;
-				case ColliderType.SphereCollider:
-					_colliderStrategy = new SphereColliderStrategy();
-					break;
-				default:
-					_colliderStrategy = null;
-					break;
+				switch (_colliderType)
+				{
+					case ColliderType.None:
+						_colliderStrategy = null;
+						break;
+					case ColliderType.BoxCollider:
+						_colliderStrategy = new BoxColliderStrategy();
+						break;
+					case ColliderType.MeshCollider:
+						_colliderStrategy = new MeshColliderStrategy();
+						break;
+					case ColliderType.SphereCollider:
+						_colliderStrategy = new SphereColliderStrategy();
+						break;
+					default:
+						_colliderStrategy = null;
+						break;
+				}
 			}
 		}
 
@@ -62,6 +66,17 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				_colliders = new Dictionary<GameObject, BoxCollider>();
 			}
 
+			public void Reset()
+			{
+				if (_colliders != null && _colliders.Count > 0)
+				{
+					foreach (var item in _colliders)
+					{
+						Destroy(item.Value);
+					}
+				}
+			}
+
 			public void AddColliderTo(VectorEntity ve)
 			{
 				if (_colliders.ContainsKey(ve.GameObject))
@@ -83,6 +98,17 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			public MeshColliderStrategy()
 			{
 				_colliders = new Dictionary<GameObject, MeshCollider>();
+			}
+
+			public void Reset()
+			{
+				if (_colliders != null && _colliders.Count > 0)
+				{
+					foreach (var item in _colliders)
+					{
+						Destroy(item.Value);
+					}
+				}
 			}
 
 			public void AddColliderTo(VectorEntity ve)
@@ -107,6 +133,17 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				_colliders = new Dictionary<GameObject, SphereCollider>();
 			}
 
+			public void Reset()
+			{
+				if (_colliders != null && _colliders.Count > 0)
+				{
+					foreach (var item in _colliders)
+					{
+						Destroy(item.Value);
+					}
+				}
+			}
+
 			public void AddColliderTo(VectorEntity ve)
 			{
 				if (_colliders.ContainsKey(ve.GameObject))
@@ -123,6 +160,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 		public interface IColliderStrategy
 		{
+			void Reset();
 			void AddColliderTo(VectorEntity ve);
 		}
 	}
