@@ -6,6 +6,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using System;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Smooth Height for Buildings Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.ChamferHeightModifier.html")]
 	public class ChamferHeightModifier : MeshModifier
 	{
 		[SerializeField]

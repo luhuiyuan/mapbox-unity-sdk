@@ -7,6 +7,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using System;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Collider Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.ColliderModifier.html")]
 	public class ColliderModifier : GameObjectModifier
 	{
 		[SerializeField]

@@ -4,6 +4,7 @@
 	using Mapbox.Unity.MeshGeneration.Data;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Snap Terrain Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.SnapTerrainModifier.html")]
 	public class SnapTerrainModifier : MeshModifier
 	{
 		public override ModifierType Type { get { return ModifierType.Preprocess; } }

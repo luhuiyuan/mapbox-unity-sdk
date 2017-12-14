@@ -9,6 +9,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// Logic is all pushed into this TextureSelector mono behaviour to make it's easier to change it in runtime.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Texture MonoBehaviour Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.TextureMonoBehaviourModifier.html")]
 	public class TextureMonoBehaviourModifier : GameObjectModifier
 	{
 		[SerializeField]

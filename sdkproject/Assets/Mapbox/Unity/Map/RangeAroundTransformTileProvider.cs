@@ -6,6 +6,7 @@
 	using Mapbox.Utils;
 	using Mapbox.Unity.Utilities;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.RangeAroundTransformTileProvider.html")]
 	public class RangeAroundTransformTileProvider : AbstractTileProvider
 	{
 		[SerializeField]

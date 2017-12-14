@@ -17,6 +17,7 @@ namespace Mapbox.Unity.Map
 	/// Later we’ll most likely keep track of map features here as well to allow devs to query for features easier 
 	/// (i.e.query all buildings x meters around any restaurant etc).
 	/// </summary>
+	
 	public abstract class AbstractMapVisualizer : ScriptableObject
 	{
 		[SerializeField]

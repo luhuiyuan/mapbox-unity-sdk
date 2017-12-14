@@ -15,6 +15,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// It pools and merges objects based on the tile contains them.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Merged Modifier Stack")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.MergedModifierStack.html")]
 	public class MergedModifierStack : ModifierStackBase
 	{
 		[NodeEditorElement("Mesh Modifiers")] public List<MeshModifier> MeshModifiers;

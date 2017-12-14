@@ -2,7 +2,9 @@
 {
 	using Mapbox.Utils;
 	using Mapbox.Map;
+	using UnityEngine;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.GlobeTileProvider.html")]
 	public class GlobeTileProvider : AbstractTileProvider
 	{
 		public override void OnInitialized()

@@ -18,6 +18,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// Height Modifier also creates a continuous UV mapping for side walls.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Height Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.HeightModifier.html")]
 	public class HeightModifier : MeshModifier
 	{
 		[SerializeField]

@@ -3,6 +3,7 @@ namespace Mapbox.Unity.Map
 	using Mapbox.Unity.Utilities;
 	using Utils;
 	using Mapbox.Map;
+	using UnityEngine;
 
 	/// <summary>
 	/// Abstract Map (Basic Map etc)
@@ -13,6 +14,7 @@ namespace Mapbox.Unity.Map
 	/// small projects or tests.
 	/// </summary>
 	/// 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.BasicMap.html")]
 	public class BasicMap : AbstractMap
 	{
 		public override void Initialize(Vector2d latLon, int zoom)

@@ -7,6 +7,7 @@
 	using System;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Add Monobehaviours Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.AddMonoBehavioursModifier.html")]
 	public class AddMonoBehavioursModifier : GameObjectModifier
 	{
 		[SerializeField]

@@ -5,6 +5,7 @@ namespace Mapbox.Unity.MeshGeneration.Components
 	using Mapbox.Unity.MeshGeneration.Data;
 	using System;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Components.FeatureBehaviour.html")]
 	public class FeatureBehaviour : MonoBehaviour
 	{
 		public VectorEntity VectorEntity;

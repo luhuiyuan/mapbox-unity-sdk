@@ -7,6 +7,7 @@ namespace Mapbox.Unity.Map
 	using Mapbox.Utils;
 	using System.Collections.Generic;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.CameraBoundsTileProvider.html")]
 	public class CameraBoundsTileProvider : AbstractTileProvider
 	{
 		[SerializeField]

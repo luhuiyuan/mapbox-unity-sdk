@@ -4,6 +4,7 @@ namespace Mapbox.Unity.MeshGeneration.Filters
     using Mapbox.Unity.MeshGeneration.Data;
 
     [CreateAssetMenu(menuName = "Mapbox/Filters/Height Filter")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Filters.HeightFilter.html")]
     public class HeightFilter : FilterBase
     {
         public enum HeightFilterOptions

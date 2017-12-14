@@ -6,6 +6,7 @@
 	using Mapbox.Map;
 	using System.Linq;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.AbstractTileProvider.html")]
 	public abstract class AbstractTileProvider : MonoBehaviour, ITileProvider
 	{
 		public event Action<UnwrappedTileId> OnTileAdded = delegate { };

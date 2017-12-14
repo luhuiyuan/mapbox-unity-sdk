@@ -10,6 +10,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
     /// MergeStartEnd parameter connects both edges of the line segment and creates a closed loop which is useful for some cases like pavements around a building block.
     /// </summary>
     [CreateAssetMenu(menuName = "Mapbox/Modifiers/Line Mesh Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.LineMeshModifier.html")]
     public class LineMeshModifier : MeshModifier
     {
         [SerializeField]

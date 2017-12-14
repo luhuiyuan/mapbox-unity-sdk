@@ -10,6 +10,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// Logic is all pushed into this TextureSelector mono behaviour to make it's easier to change it in runtime.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Material Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.MaterialModifier.html")]
 	public class MaterialModifier : GameObjectModifier
 	{
 		[SerializeField]

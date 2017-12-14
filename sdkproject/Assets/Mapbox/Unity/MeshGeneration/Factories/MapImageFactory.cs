@@ -17,6 +17,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	/// <summary>
 	/// Uses raster image services to create materials & textures for terrain
 	/// </summary>
+
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Factories.MapImageFactory.html")]
 	[CreateAssetMenu(menuName = "Mapbox/Factories/Image Factory")]
 	public class MapImageFactory : AbstractTileFactory
 	{

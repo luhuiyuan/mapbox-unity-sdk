@@ -46,6 +46,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	/// will be visualized or not and returns a boolean. It runs before stacks so features decided not to be visualized is skipped right away.Using filters, you can do things like; 'not visualize schools' or 'not (or only) visualize buildings taller than 50meters'.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Layer Visualizer/Vector Layer Visualizer")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Interfaces.VectorLayerVisualizer.html")]
 	public class VectorLayerVisualizer : LayerVisualizerBase
 	{
 		[SerializeField]

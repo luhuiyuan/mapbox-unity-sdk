@@ -12,6 +12,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using System;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Spawn Inside Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.SpawnInsideModifier.html")]
 	public class SpawnInsideModifier : GameObjectModifier
 	{
 		[SerializeField]

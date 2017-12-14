@@ -11,6 +11,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// If UseSatelliteRoof parameter is false, it creates a tiled UV map, otherwise it creates a stretched UV map.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/UV Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.UvModifier.html")]
 	public class UvModifier : MeshModifier
 	{
 		public override ModifierType Type { get { return ModifierType.Preprocess; } }

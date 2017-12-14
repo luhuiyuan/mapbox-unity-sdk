@@ -12,6 +12,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 	[Obsolete("Texture Modifier is obsolete. Please use Material Modifier.")]
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Texture Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.TextureModifier.html")]
     public class TextureModifier : GameObjectModifier
     {
         [SerializeField]

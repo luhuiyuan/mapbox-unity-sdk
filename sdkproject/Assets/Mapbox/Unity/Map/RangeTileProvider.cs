@@ -3,6 +3,7 @@ namespace Mapbox.Unity.Map
 	using UnityEngine;
 	using Mapbox.Map;
 
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.Map.RangeTileProvider.html")]
 	public class RangeTileProvider : AbstractTileProvider
 	{
 		[SerializeField]

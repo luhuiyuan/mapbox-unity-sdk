@@ -7,6 +7,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using System.Collections.Generic;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Prefab Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.PrefabModifier.html")]
 	public class PrefabModifier : GameObjectModifier
 	{
 		[SerializeField]

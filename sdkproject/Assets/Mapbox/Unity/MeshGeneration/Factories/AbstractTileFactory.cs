@@ -29,6 +29,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	/// and apply height data on that. By creating a custom terrain factory, you can have a custom mesh instead of a grid, 
 	/// optimize and minimize vertex count etc.
 	/// </summary>
+	
+
 	public abstract class AbstractTileFactory : ScriptableObject
 	{
 		protected IFileSource _fileSource;

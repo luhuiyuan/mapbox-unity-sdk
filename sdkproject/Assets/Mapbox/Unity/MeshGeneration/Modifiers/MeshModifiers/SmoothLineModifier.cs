@@ -6,6 +6,7 @@ using Mapbox.Unity.MeshGeneration.Data;
 namespace Mapbox.Unity.MeshGeneration.Modifiers
 {
     [CreateAssetMenu(menuName = "Mapbox/Modifiers/Smooth Line Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.SmoothLineModifier.html")]
     public class SmoothLineModifier : MeshModifier
     {
         public override ModifierType Type { get { return ModifierType.Preprocess; } }

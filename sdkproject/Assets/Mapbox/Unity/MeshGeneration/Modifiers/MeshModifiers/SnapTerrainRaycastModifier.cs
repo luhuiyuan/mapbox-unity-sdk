@@ -5,6 +5,7 @@
 	using UnityEngine;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Snap Terrain Raycast Modifier")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.SnapTerrainRaycastModifier.html")]
 	public class SnapTerrainRaycastModifier : MeshModifier
 	{
 		private const int RAY_LENGTH = 50;

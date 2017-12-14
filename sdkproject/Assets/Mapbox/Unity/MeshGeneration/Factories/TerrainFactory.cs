@@ -17,6 +17,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	/// <summary>
 	/// Uses Mapbox Terrain api and creates terrain meshes.
 	/// </summary>
+
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Factories.TerrainFactory.html")]
 	[CreateAssetMenu(menuName = "Mapbox/Factories/Terrain Factory")]
 	public class TerrainFactory : AbstractTileFactory
 	{

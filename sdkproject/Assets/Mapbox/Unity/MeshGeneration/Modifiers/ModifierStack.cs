@@ -36,6 +36,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	/// using that mesh data.Run all game object modifiers to decorate that game object.
 	/// </summary>
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Modifier Stack")]
+	[HelpURL("https://www.mapbox.com/mapbox-unity-sdk/api/unity/Mapbox.Unity.MeshGeneration.Modifiers.ModifierStack.html")]
 	public class ModifierStack : ModifierStackBase
 	{
 		[SerializeField] private PositionTargetType _moveFeaturePositionTo;
