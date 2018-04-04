@@ -23,7 +23,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 		private int _vertA, _vertB, _vertC;
 		private int _counter;
 
-		public override void OnInitialized(ElevationLayerProperties elOptions)
+		public override void Initialize(ElevationLayerProperties elOptions)
 		{
 			_elevationOptions = elOptions;
 
@@ -36,9 +36,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			_newUvList = new List<Vector2>(sampleCountSquare);
 			_newTriangleList = new List<int>();
 		}
-
-
-		public override void OnRegistered(UnityTile tile)
+		
+		public override void RegisterTile(UnityTile tile)
 		{
 			if (_elevationOptions.unityLayerOptions.addToLayer && tile.gameObject.layer != _elevationOptions.unityLayerOptions.layerId)
 			{
@@ -67,6 +66,11 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			}
 
 			GenerateTerrainMesh(tile);
+		}
+
+		public override void UnregisterTile(UnityTile tile)
+		{
+			_meshData.Remove(tile.UnwrappedTileId);
 		}
 
 		private void CreateBaseMesh(UnityTile tile)
@@ -224,11 +228,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			mesh.SetTriangles(_newTriangleList, 0);
 			mesh.SetTriangles(baseTriList, 1);
 		}
-
-		public override void OnUnregistered(UnityTile tile)
-		{
-			_meshData.Remove(tile.UnwrappedTileId);
-		}
+			
 
 		/// <summary>
 		/// Creates the non-flat terrain mesh, using a grid by defined resolution (_sampleCount). Vertex order goes right & up. Normals are calculated manually and UV map is fitted/stretched 1-1.

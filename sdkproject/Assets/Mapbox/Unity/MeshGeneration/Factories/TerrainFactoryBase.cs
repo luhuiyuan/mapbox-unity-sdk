@@ -22,7 +22,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		internal override void OnInitialized()
 		{
-			Strategy.OnInitialized(_elevationOptions);
+			Strategy.Initialize(_elevationOptions);
 		}
 
 		internal override void OnRegistered(UnityTile tile)
@@ -53,27 +53,27 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 						// TODO: optimize this search!
 						if (pngRasterTile.ExceptionsAsString.Contains("404"))
 						{
-							Strategy.OnFetchingError(pngRasterTile.Exceptions);
+							Strategy.FetchingError(pngRasterTile.Exceptions);
 						}
 						Progress--;
 						return;
 					}
 
 					tile.SetHeightData(pngRasterTile.Data, _elevationOptions.requiredOptions.exaggerationFactor, _elevationOptions.modificationOptions.useRelativeHeight);
-					Strategy.OnRegistered(tile);
+					Strategy.RegisterTile(tile);
 
 				});
 			}
 			else
 			{
-				Strategy.OnRegistered(tile);
+				Strategy.RegisterTile(tile);
 			}
 			Progress--;
 		}
 
 		internal override void OnUnregistered(UnityTile tile)
 		{
-			Strategy.OnUnregistered(tile);
+			Strategy.UnregisterTile(tile);
 		}
 	}
 }
