@@ -134,14 +134,7 @@
 					_elevationFactory.Strategy = new LowPolyTerrainStrategy();
 					break;
 				case ElevationLayerType.TerrainWithElevation:
-					if (_layerProperty.sideWallOptions.isActive)
-					{
-						_elevationFactory.Strategy = new ElevatedTerrainWithSidesStrategy();
-					}
-					else
-					{
-						_elevationFactory.Strategy = new ElevatedTerrainStrategy();
-					}
+					_elevationFactory.Strategy = new ElevatedTerrainStrategy();
 					break;
 				case ElevationLayerType.GlobeTerrain:
 					_elevationFactory.Strategy = new FlatSphereTerrainStrategy();

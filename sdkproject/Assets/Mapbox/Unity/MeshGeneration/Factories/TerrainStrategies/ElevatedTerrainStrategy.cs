@@ -16,28 +16,22 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 		private MeshData _currentTileMeshData;
 		private MeshData _stitchTargetMeshData;
 
-		private List<Vector3> _newVertexList;
-		private List<Vector3> _newNormalList;
-		private List<Vector2> _newUvList;
-		private List<int> _newTriangleList;
 		private Vector3 _newDir;
 		private int _vertA, _vertB, _vertC;
 		private int _counter;
 		private int _sampleCount;
+		private Vector3 _sideWallHeight;
 
 		public override void Initialize(ElevationLayerProperties elOptions)
 		{
 			base.Initialize(elOptions);
 
 			_sampleCount = _elevationOptions.modificationOptions.sampleCount;
+			_sideWallHeight = new Vector3(0, -1 * _elevationOptions.sideWallOptions.wallHeight, 0);
 			_meshData = new Dictionary<UnwrappedTileId, Mesh>();
 			_currentTileMeshData = new MeshData();
 			_stitchTargetMeshData = new MeshData();
 			var sampleCountSquare = _elevationOptions.modificationOptions.sampleCount * _elevationOptions.modificationOptions.sampleCount;
-			_newVertexList = new List<Vector3>(sampleCountSquare);
-			_newNormalList = new List<Vector3>(sampleCountSquare);
-			_newUvList = new List<Vector2>(sampleCountSquare);
-			_newTriangleList = new List<int>();
 		}
 
 		public override void RegisterTile(UnityTile tile)
@@ -50,14 +44,26 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			if (tile.MeshRenderer == null)
 			{
 				var renderer = tile.gameObject.AddComponent<MeshRenderer>();
-				renderer.material = _elevationOptions.requiredOptions.baseMaterial;
+				
+				//we create side walls as a submesh so addig a second material in that case
+				if(_elevationOptions.sideWallOptions.isActive)
+				{
+					renderer.materials = new Material[2]
+					{
+						_elevationOptions.requiredOptions.baseMaterial,
+						_elevationOptions.sideWallOptions.wallMaterial
+					};
+				}
+				else
+				{
+					renderer.material = _elevationOptions.requiredOptions.baseMaterial;
+				}
 			}
 
 			if (tile.MeshFilter == null)
 			{
 				tile.gameObject.AddComponent<MeshFilter>();
 				CreateBaseMesh(tile);
-				CreateSideWalls();
 			}
 
 			if (_elevationOptions.requiredOptions.addCollider && tile.Collider == null)
@@ -67,12 +73,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 
 			GenerateTerrainMesh(tile);
 		}
-
-		public void CreateSideWalls()
-		{
-
-		}
-
+		
 		public override void UnregisterTile(UnityTile tile)
 		{
 			_meshData.Remove(tile.UnwrappedTileId);
@@ -81,15 +82,27 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 		#region mesh gen
 		private void CreateBaseMesh(UnityTile tile)
 		{
-			//TODO use arrays instead of lists
-			_newVertexList.Clear();
-			_newNormalList.Clear();
-			_newUvList.Clear();
-			_newTriangleList.Clear();
+			_currentTileMeshData.Clear();
+			for (float y = 0; y < _sampleCount; y++)
+			{
+				var yrat = y / (_sampleCount - 1);
+				for (float x = 0; x < _sampleCount; x++)
+				{
+					var xrat = x / (_sampleCount - 1);
 
-			CreateTop(tile, _sampleCount);
-			CreateSides(tile);
+					var xx = Mathd.Lerp(tile.Rect.Min.x, tile.Rect.Max.x, xrat);
+					var yy = Mathd.Lerp(tile.Rect.Min.y, tile.Rect.Max.y, yrat);
 
+					_currentTileMeshData.Vertices.Add(new Vector3(
+						(float)(xx - tile.Rect.Center.x) * tile.TileScale,
+						0,
+						(float)(yy - tile.Rect.Center.y) * tile.TileScale));
+					_currentTileMeshData.Normals.Add(Mapbox.Unity.Constants.Math.Vector3Up);
+					_currentTileMeshData.UV[0].Add(new Vector2(x * 1f / (_sampleCount - 1), 1 - (y * 1f / (_sampleCount - 1))));
+				}
+			}
+
+			_currentTileMeshData.Triangles.Add(new List<int>());
 			int vertA, vertB, vertC;
 			for (int y = 0; y < _sampleCount - 1; y++)
 			{
@@ -98,172 +111,32 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 					vertA = (y * _sampleCount) + x;
 					vertB = (y * _sampleCount) + x + _sampleCount + 1;
 					vertC = (y * _sampleCount) + x + _sampleCount;
-					_newTriangleList.Add(vertA);
-					_newTriangleList.Add(vertB);
-					_newTriangleList.Add(vertC);
+					_currentTileMeshData.Triangles[0].Add(vertA);
+					_currentTileMeshData.Triangles[0].Add(vertB);
+					_currentTileMeshData.Triangles[0].Add(vertC);
 
 					vertA = (y * _sampleCount) + x;
 					vertB = (y * _sampleCount) + x + 1;
 					vertC = (y * _sampleCount) + x + _sampleCount + 1;
-					_newTriangleList.Add(vertA);
-					_newTriangleList.Add(vertB);
-					_newTriangleList.Add(vertC);
+					_currentTileMeshData.Triangles[0].Add(vertA);
+					_currentTileMeshData.Triangles[0].Add(vertB);
+					_currentTileMeshData.Triangles[0].Add(vertC);
 				}
 			}
 			var mesh = tile.MeshFilter.mesh;
-			mesh.SetVertices(_newVertexList);
-			mesh.SetNormals(_newNormalList);
-			mesh.SetUVs(0, _newUvList);
-			mesh.SetTriangles(_newTriangleList, 0);
-		}
-
-		private void CreateSides(UnityTile tile)
-		{
-			int index = _newVertexList.Count;
-			for (int i = 0; i < _sampleCount - 1; i++)
-			{
-				//first vertex column of the row
-				if (i == 0)
-				{
-					_newVertexList.Add(_newVertexList[i]);
-					_newVertexList.Add(_newVertexList[i] + new Vector3(0, -100, 0));
-					_newNormalList.Add(Vector3.forward);
-					_newNormalList.Add(Vector3.forward);
-				}
-
-				//adding next vertex column so we can create triangle inbetween
-				_newVertexList.Add(_newVertexList[i + 1]);
-				_newVertexList.Add(_newVertexList[i + 1] + new Vector3(0, -100, 0));
-				_newNormalList.Add(Vector3.forward);
-				_newNormalList.Add(Vector3.forward);
-
-				//02
-				//13
-				_newTriangleList.Add(index);
-				_newTriangleList.Add(index + 1);
-				_newTriangleList.Add(index + 2);
-
-				_newTriangleList.Add(index + 2);
-				_newTriangleList.Add(index + 1);
-				_newTriangleList.Add(index + 3);
-
-				//move to next vertex column
-				index += 2;
-			}
-
-			index += 2;
-			for (int i = 0; i < _sampleCount - 1; i++)
-			{
-				//first vertex column of the row
-				if (i == 0)
-				{
-					_newVertexList.Add(_newVertexList[i * _sampleCount]);
-					_newVertexList.Add(_newVertexList[i * _sampleCount] + new Vector3(0, -100, 0));
-					_newNormalList.Add(Vector3.left);
-					_newNormalList.Add(Vector3.left);
-
-					_newVertexList.Add(_newVertexList[i * _sampleCount + (_sampleCount - 1)]);
-					_newVertexList.Add(_newVertexList[i * _sampleCount + (_sampleCount - 1)] + new Vector3(0, -100, 0));
-					_newNormalList.Add(Vector3.right);
-					_newNormalList.Add(Vector3.right);
-				}
-
-				_newVertexList.Add(_newVertexList[(i + 1) * _sampleCount]);
-				_newVertexList.Add(_newVertexList[(i + 1) * _sampleCount] + new Vector3(0, -100, 0));
-				_newNormalList.Add(Vector3.left);
-				_newNormalList.Add(Vector3.left);
-
-				_newVertexList.Add(_newVertexList[(i + 1) * _sampleCount + (_sampleCount - 1)]);
-				_newVertexList.Add(_newVertexList[(i + 1) * _sampleCount + (_sampleCount - 1)] + new Vector3(0, -100, 0));
-				_newNormalList.Add(Vector3.right);
-				_newNormalList.Add(Vector3.right);
-
-				//10-----23
-				//54-----67
-
-				_newTriangleList.Add(index);
-				_newTriangleList.Add(index + 4);
-				_newTriangleList.Add(index + 1);
-
-				_newTriangleList.Add(index + 4);
-				_newTriangleList.Add(index + 5);
-				_newTriangleList.Add(index + 1);
-
-				//----
-
-				_newTriangleList.Add(index + 2);
-				_newTriangleList.Add(index + 3);
-				_newTriangleList.Add(index + 6);
-
-				_newTriangleList.Add(index + 6);
-				_newTriangleList.Add(index + 3);
-				_newTriangleList.Add(index + 7);
-
-				//move to next vertex column
-				index += 4;
-			}
-
-			index += 4;
-			var cc = _sampleCount * _sampleCount;
-			for (int i = cc - _sampleCount; i < cc - 1; i++)
-			{
-				//first vertex column of the row
-				if (i == cc - _sampleCount)
-				{
-					_newVertexList.Add(_newVertexList[i]);
-					_newVertexList.Add(_newVertexList[i] + new Vector3(0, -100, 0));
-					_newNormalList.Add(Vector3.back);
-					_newNormalList.Add(Vector3.back);
-				}
-
-				//adding next vertex column so we can create triangle inbetween
-				_newVertexList.Add(_newVertexList[i + 1]);
-				_newVertexList.Add(_newVertexList[i + 1] + new Vector3(0, -100, 0));
-				_newNormalList.Add(Vector3.back);
-				_newNormalList.Add(Vector3.back);
-
-				//02
-				//13
-				_newTriangleList.Add(index);
-				_newTriangleList.Add(index + 2);
-				_newTriangleList.Add(index + 1);
-
-				_newTriangleList.Add(index + 2);
-				_newTriangleList.Add(index + 3);
-				_newTriangleList.Add(index + 1);
-
-				//move to next vertex column
-				index += 2;
-			}
-
-		}
-
-		private void CreateTop(UnityTile tile, int sampleCount)
-		{
-			for (float y = 0; y < sampleCount; y++)
-			{
-				var yrat = y / (sampleCount - 1);
-				for (float x = 0; x < sampleCount; x++)
-				{
-					var xrat = x / (sampleCount - 1);
-
-					var xx = Mathd.Lerp(tile.Rect.Min.x, tile.Rect.Max.x, xrat);
-					var yy = Mathd.Lerp(tile.Rect.Min.y, tile.Rect.Max.y, yrat);
-
-					_newVertexList.Add(new Vector3(
-						(float)(xx - tile.Rect.Center.x) * tile.TileScale,
-						0,
-						(float)(yy - tile.Rect.Center.y) * tile.TileScale));
-					_newNormalList.Add(Mapbox.Unity.Constants.Math.Vector3Up);
-					_newUvList.Add(new Vector2(x * 1f / (sampleCount - 1), 1 - (y * 1f / (sampleCount - 1))));
-				}
-			}
+			mesh.SetVertices(_currentTileMeshData.Vertices);
+			mesh.SetNormals(_currentTileMeshData.Normals);
+			mesh.SetUVs(0, _currentTileMeshData.UV[0]);
+			mesh.SetTriangles(_currentTileMeshData.Triangles[0], 0);
+			_currentTileMeshData.Clear();
 		}
 
 		private void GenerateTerrainMesh(UnityTile tile)
 		{
 			tile.MeshFilter.mesh.GetVertices(_currentTileMeshData.Vertices);
 			tile.MeshFilter.mesh.GetNormals(_currentTileMeshData.Normals);
+			tile.MeshFilter.mesh.GetUVs(0, _currentTileMeshData.UV[0]);
+
 			int sideStart = _sampleCount * _sampleCount;
 
 			for (float y = 0; y < _sampleCount; y++)
@@ -275,28 +148,8 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 						tile.QueryHeightData(x / (_sampleCount - 1), 1 - y / (_sampleCount - 1)),
 						_currentTileMeshData.Vertices[(int)(y * _sampleCount + x)].z);
 					_currentTileMeshData.Normals[(int)(y * _sampleCount + x)] = Mapbox.Unity.Constants.Math.Vector3Zero;
-
-					if (y == 0)
-					{
-						_currentTileMeshData.Vertices[(int)(sideStart + 2 * x)] = _currentTileMeshData.Vertices[(int)(y * _sampleCount + x)];
-					}
-					else if (y == _sampleCount - 1)
-					{
-						_currentTileMeshData.Vertices[(int)(sideStart + _sampleCount*6 + 2 * x)] = _currentTileMeshData.Vertices[(int)(y * _sampleCount + x)];
-					}
-
-					if (x == 0)
-					{
-						_currentTileMeshData.Vertices[(int)(sideStart + _sampleCount * 2 + 4 * y)] = _currentTileMeshData.Vertices[(int)(y * _sampleCount + x)];
-					}
-					else if (x == _sampleCount - 1)
-					{
-						_currentTileMeshData.Vertices[(int)(sideStart + _sampleCount * 2 + 4 * y + 2)] = _currentTileMeshData.Vertices[(int)(y * _sampleCount + x)];
-					}
 				}
 			}
-
-			tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
 
 			for (int y = 0; y < _sampleCount - 1; y++)
 			{
@@ -321,9 +174,22 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			}
 
 			FixStitches(tile.UnwrappedTileId, _currentTileMeshData);
+			if (_elevationOptions.sideWallOptions.isActive)
+			{
+				_currentTileMeshData.Triangles.Add(new List<int>());
+				CreateSides(tile);
 
-			tile.MeshFilter.mesh.SetNormals(_currentTileMeshData.Normals);
-			tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
+				tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
+				tile.MeshFilter.mesh.SetNormals(_currentTileMeshData.Normals);
+				tile.MeshFilter.mesh.subMeshCount = 2;
+				tile.MeshFilter.mesh.SetTriangles(_currentTileMeshData.Triangles[0], 1);
+				tile.MeshFilter.mesh.SetUVs(0, _currentTileMeshData.UV[0]);
+			}
+			else
+			{
+				tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
+				tile.MeshFilter.mesh.SetNormals(_currentTileMeshData.Normals);
+			}
 
 			tile.MeshFilter.mesh.RecalculateBounds();
 
@@ -342,25 +208,163 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 			}
 		}
 
-		private void ResetToFlatMesh(UnityTile tile)
+		private void CreateSides(UnityTile tile)
 		{
-			tile.MeshFilter.mesh.GetVertices(_currentTileMeshData.Vertices);
-			tile.MeshFilter.mesh.GetNormals(_currentTileMeshData.Normals);
-
-			_counter = _currentTileMeshData.Vertices.Count;
-			for (int i = 0; i < _counter; i++)
+			int index = _currentTileMeshData.Vertices.Count;
+			var polyColumnCount = _sampleCount - 1;
+			#region North Side Wall
+			for (int i = 0; i < _sampleCount - 1; i++)
 			{
-				_currentTileMeshData.Vertices[i] = new Vector3(
-					_currentTileMeshData.Vertices[i].x,
-					0,
-					_currentTileMeshData.Vertices[i].z);
-				_currentTileMeshData.Normals[i] = Mapbox.Unity.Constants.Math.Vector3Up;
+				//vertices and triangulation goes like;
+				//02
+				//13
+
+				//first vertex column of the row
+				if (i == 0)
+				{
+					//clone existing terrain vertex, this is the top of the vertex column (0)
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i]);
+					//create the bottom vertex (1)
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i] + _sideWallHeight);
+					//is using Vector3.forward safe here? we don't rotate or anything so should be good I guess?
+					_currentTileMeshData.Normals.Add(Vector3.forward);
+					_currentTileMeshData.Normals.Add(Vector3.forward);
+					//thinking it like a cube; top north west corner is the 0,1 
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 1));
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 0));
+				}
+
+				//adding next vertex column so we can create triangle inbetween (2)
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i + 1]);
+				//next column bottom vertex (3)
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i + 1] + _sideWallHeight);
+				_currentTileMeshData.Normals.Add(Vector3.forward);
+				_currentTileMeshData.Normals.Add(Vector3.forward);
+				//texture is stretched to side wall
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 1));
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 0));
+
+				//0,1,2 triangle ccw
+				_currentTileMeshData.Triangles[0].Add(index);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+				_currentTileMeshData.Triangles[0].Add(index + 2);
+
+				//2,1,3 triangle ccw
+				_currentTileMeshData.Triangles[0].Add(index + 2);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+				_currentTileMeshData.Triangles[0].Add(index + 3);
+
+				//move to next vertex column
+				index += 2;
 			}
+			//for the last to vertices of north wall
+			index += 2;
+			#endregion
 
-			tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
-			tile.MeshFilter.mesh.SetNormals(_currentTileMeshData.Normals);
+			#region West/East walls
+			for (int i = 0; i < _sampleCount - 1; i++)
+			{
+				//first vertex column of the row
+				if (i == 0)
+				{
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i * _sampleCount]);
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i * _sampleCount] + _sideWallHeight);
+					_currentTileMeshData.Normals.Add(Vector3.left);
+					_currentTileMeshData.Normals.Add(Vector3.left);
+					//thinking it like a cube; top north east is 0.1 for west wall
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 1));
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 0));
 
-			tile.MeshFilter.mesh.RecalculateBounds();
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i * _sampleCount + (_sampleCount - 1)]);
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i * _sampleCount + (_sampleCount - 1)] + _sideWallHeight);
+					_currentTileMeshData.Normals.Add(Vector3.right);
+					_currentTileMeshData.Normals.Add(Vector3.right);
+					//thinking it like a cube; top north east is 0.1 for east wall
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 1));
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 0));
+				}
+
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[(i + 1) * _sampleCount]);
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[(i + 1) * _sampleCount] + _sideWallHeight);
+				_currentTileMeshData.Normals.Add(Vector3.left);
+				_currentTileMeshData.Normals.Add(Vector3.left);
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 1));
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 0));
+
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[(i + 1) * _sampleCount + (_sampleCount - 1)]);
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[(i + 1) * _sampleCount + (_sampleCount - 1)] + _sideWallHeight);
+				_currentTileMeshData.Normals.Add(Vector3.right);
+				_currentTileMeshData.Normals.Add(Vector3.right);
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 1));
+				_currentTileMeshData.UV[0].Add(new Vector2((i + 1f) / polyColumnCount, 0));
+
+				//10-----23
+				//54-----67
+
+				_currentTileMeshData.Triangles[0].Add(index);
+				_currentTileMeshData.Triangles[0].Add(index + 4);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+
+				_currentTileMeshData.Triangles[0].Add(index + 4);
+				_currentTileMeshData.Triangles[0].Add(index + 5);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+
+				//----
+
+				_currentTileMeshData.Triangles[0].Add(index + 2);
+				_currentTileMeshData.Triangles[0].Add(index + 3);
+				_currentTileMeshData.Triangles[0].Add(index + 6);
+
+				_currentTileMeshData.Triangles[0].Add(index + 6);
+				_currentTileMeshData.Triangles[0].Add(index + 3);
+				_currentTileMeshData.Triangles[0].Add(index + 7);
+
+				//move to next vertex column
+				index += 4;
+			}
+			index += 4;
+			#endregion
+
+			#region South Wall
+			var cc = _sampleCount * _sampleCount;
+			for (int i = cc - _sampleCount; i < cc - 1; i++)
+			{
+				//first vertex column of the row
+				if (i == cc - _sampleCount)
+				{
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i]);
+					_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i] + _sideWallHeight);
+					_currentTileMeshData.Normals.Add(Vector3.back);
+					_currentTileMeshData.Normals.Add(Vector3.back);
+					//thinking it like a cube; top south west is 0,1
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 1));
+					_currentTileMeshData.UV[0].Add(new Vector2(0, 0));
+				}
+
+				//adding next vertex column so we can create triangle inbetween
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i + 1]);
+				_currentTileMeshData.Vertices.Add(_currentTileMeshData.Vertices[i + 1] + _sideWallHeight);
+				_currentTileMeshData.Normals.Add(Vector3.back);
+				_currentTileMeshData.Normals.Add(Vector3.back);
+				//uv coordinate is a little messy here because i isn't starting at 0
+				//cc-i is the progress inversed so we subtract that from _sampleCOunt (edge width in a sense)
+				_currentTileMeshData.UV[0].Add(new Vector2((_sampleCount - (cc - i) + 1f) / polyColumnCount, 1));
+				_currentTileMeshData.UV[0].Add(new Vector2((_sampleCount - (cc - i) + 1f) / polyColumnCount, 0));
+
+				//02
+				//13
+				_currentTileMeshData.Triangles[0].Add(index);
+				_currentTileMeshData.Triangles[0].Add(index + 2);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+
+				_currentTileMeshData.Triangles[0].Add(index + 2);
+				_currentTileMeshData.Triangles[0].Add(index + 3);
+				_currentTileMeshData.Triangles[0].Add(index + 1);
+
+				//move to next vertex column
+				index += 2;
+			}
+			#endregion
 		}
 
 		/// <summary>
@@ -385,7 +389,6 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 						mesh.Vertices[i].x,
 						_stitchTargetMeshData.Vertices[meshVertCount - _sampleCount + i].y,
 						mesh.Vertices[i].z);
-					mesh.Vertices[meshVertCount + 2 * i] = mesh.Vertices[i];
 
 					mesh.Normals[i] = new Vector3(_stitchTargetMeshData.Normals[meshVertCount - _sampleCount + i].x,
 						_stitchTargetMeshData.Normals[meshVertCount - _sampleCount + i].y,
@@ -533,6 +536,28 @@ namespace Mapbox.Unity.MeshGeneration.Factories.TerrainStrategies
 					_stitchTargetMeshData.Normals[0].z);
 			}
 		}
+
+		private void ResetToFlatMesh(UnityTile tile)
+		{
+			tile.MeshFilter.mesh.GetVertices(_currentTileMeshData.Vertices);
+			tile.MeshFilter.mesh.GetNormals(_currentTileMeshData.Normals);
+
+			_counter = _currentTileMeshData.Vertices.Count;
+			for (int i = 0; i < _counter; i++)
+			{
+				_currentTileMeshData.Vertices[i] = new Vector3(
+					_currentTileMeshData.Vertices[i].x,
+					0,
+					_currentTileMeshData.Vertices[i].z);
+				_currentTileMeshData.Normals[i] = Mapbox.Unity.Constants.Math.Vector3Up;
+			}
+
+			tile.MeshFilter.mesh.SetVertices(_currentTileMeshData.Vertices);
+			tile.MeshFilter.mesh.SetNormals(_currentTileMeshData.Normals);
+
+			tile.MeshFilter.mesh.RecalculateBounds();
+		}
+
 		#endregion
 	}
 }
